@@ -90,7 +90,7 @@ A lightweight desktop app for Windows that shows album, artist and track names w
 
 Made for people whose Winamp or Windows Media Player no longer shows track names for audio CDs. You don't need a heavy suite like iTunes to see a track list and play a disc.
 
-![DISC.TOC](docs/screenshot.png)
+![DISC.TOC](docs/screenshot.webp)
 
 ## Features
 
