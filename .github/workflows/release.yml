@@ -1,6 +1,6 @@
 name: release
 
-# タグ（例: v0.1.0）を push すると、Windows 用インストーラをビルドして
+# タグ（例: v0.4.0）を push すると、Windows 用と Linux 用をビルドして
 # GitHub Releases に「下書き」で置く。内容を確認してから Publish する。
 on:
   push:
@@ -11,10 +11,20 @@ permissions:
   contents: write
 
 jobs:
-  build-windows:
-    runs-on: windows-latest
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-22.04]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install Linux build dependencies
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf build-essential
 
       - uses: dtolnay/rust-toolchain@stable
 
@@ -33,6 +43,6 @@ jobs:
           tauriScript: cargo tauri
           tagName: ${{ github.ref_name }}
           releaseName: 'DISC.TOC ${{ github.ref_name }}'
-          releaseBody: 'Windows インストーラ（.msi / .exe）。使い方は README を参照。'
+          releaseBody: 'Windows インストーラ（.msi / .exe）と Linux パッケージ（.deb / .rpm / .AppImage）。使い方は README を参照。'
           releaseDraft: true
           prerelease: false

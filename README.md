@@ -2,7 +2,7 @@
 
 **日本語** | [English](#english)
 
-音楽CDを入れるだけで、アルバム名・アーティスト・曲名を表示して再生する軽量なデスクトップアプリ（Windows）。**管理者権限は不要**です。
+音楽CDを入れるだけで、アルバム名・アーティスト・曲名を表示して再生する軽量なデスクトップアプリ（Windows / Linux）。**管理者権限は不要**です。
 
 Winamp や Windows Media Player で、CDを入れても曲名が出なくなった人向け。iTunes のような重いソフトを入れなくても、曲リストを見て再生できます。
 
@@ -14,6 +14,7 @@ Winamp や Windows Media Player で、CDを入れても曲名が出なくなっ�
 - **管理者権限なし**でドライブから直接読み取り（ディスクIDの計算・生音声の読み出しとも）
 - トラックを選ぶとすぐ再生（読みながら再生するストリーミング方式）。シーク・音量・イコライザー・リピート・シャッフル付き
 - クラシックなプレイヤー風の見た目。スキン切替（LAIN / AQUA）
+- メイン・イコライザー・プレイリストは**別ウィンドウ**（枠なし）。自由に動かせて、近づけると吸着し、位置は次回起動で復元
 - 曲名・アーティストの**手動編集**（MusicBrainz に無いCD向け）。編集内容はディスクごとに自動保存され、次回からネットなしで表示
 - **書き出し**: TXT / CSV / CUE / JSON。JSON は読み込んで復元できる
 - MusicBrainz への登録ページを開くボタン（情報が無いCDを、みんなで育てるDBに登録できる）
@@ -25,7 +26,12 @@ Winamp や Windows Media Player で、CDを入れても曲名が出なくなっ�
 - Windows 10 / 11（WebView2 が必要。Windows 11 には標準で入っています）
 - 光学ドライブ（CD-ROM / DVD / BD ドライブ）
 
-Linux 対応は予定中です。macOS は今のところ対象外です。
+**Linux**（v0.4.0 から）
+- Debian 12 で動作確認。`.deb` / `.rpm` / `.AppImage` を配布
+- ドライブ（`/dev/sr0` など）を読むには、ユーザーが `cdrom` グループに入っている必要があります。
+  `sudo usermod -aG cdrom $USER` を実行して、ログインし直してください
+
+macOS は今のところ対象外です。
 
 ## 使い方
 
@@ -39,11 +45,11 @@ Linux 対応は予定中です。macOS は今のところ対象外です。
 
 ## 仕組み
 
-1. Windows の `IOCTL_CDROM_READ_TOC` でCDの目次（TOC）を読む
+1. Windows は `IOCTL_CDROM_READ_TOC`、Linux は `CDROMREADTOCENTRY` でCDの目次（TOC）を読む
 2. TOC から MusicBrainz のディスクIDを計算し、MusicBrainz に問い合わせる。見つからないときは TOC 検索にフォールバック
-3. 再生時は `IOCTL_CDROM_RAW_READ` で1秒分ずつ生データを読み、読みながら Web Audio で再生
+3. 再生時は `IOCTL_CDROM_RAW_READ`（Linux は `CDROMREADAUDIO`）で1秒分ずつ生データを読み、読みながら Web Audio で再生
 
-ドライブは通常の読み取り権限で開くため、管理者権限は要りません。
+Windows ではドライブを通常の読み取り権限で開くため、管理者権限は要りません。
 
 ## ビルド
 
@@ -57,19 +63,24 @@ cargo tauri build      # インストーラ作成
 
 - `core/` … 純粋ロジック（TOC解析、ディスクID、書き出し形式）。`cargo test -p disctoc-core` でテスト
 - `core/src/cd_win.rs` … Windows のドライブアクセス
+- `core/src/cd_linux.rs` … Linux のドライブアクセス（`/dev/sr*` の ioctl）
 - `src-tauri/` … Tauri アプリ本体
 - `ui/` … 画面（素の HTML / CSS / JS。`skins/` にスキン）
 
 ## 現状と制限
 
-- 動作確認は限られた環境（1台のドライブ、数枚のCD）です。うまく動かないドライブやCDがあれば Issue で教えてください
+- 動作確認は限られた環境（Windows と Debian 12 で、それぞれ1台のドライブ、数枚のCD）です。うまく動かないドライブやCDがあれば Issue で教えてください
 - 再生開始は、ドライブのスピンアップ分（数秒）だけ遅れることがあります
 - コピーガード付きのCD（CCCD など）は読めない場合があります
-- Linux 対応、MP3 / OGG 書き出しは未実装（音声の書き出し自体がまだありません）
+- Linux 版は、Debian 12 以外のディストリビューションや Wayland セッションでは未確認です
+- MP3 / OGG 書き出しは未実装（WAV のみ）
 
 ## インストール
 
-[Releases](../../releases) から、Windows 用インストーラ（`.msi` または `.exe`）をダウンロードして実行してください。
+[Releases](../../releases) からダウンロードしてください。
+
+- Windows: インストーラ（`.msi` または `.exe`）
+- Linux: `.deb`（Debian / Ubuntu 系）、`.rpm`（Fedora 系）、`.AppImage`
 
 ## ライセンス
 
@@ -87,7 +98,7 @@ DISC.TOC は MusicBrainz、および他のいかなる音楽プレイヤーと�
 
 # DISC.TOC (English)
 
-A lightweight desktop app for Windows that shows album, artist and track names when you insert an audio CD, and plays it. **No administrator rights needed.**
+A lightweight desktop app for Windows and Linux that shows album, artist and track names when you insert an audio CD, and plays it. **No administrator rights needed.**
 
 Made for people whose Winamp or Windows Media Player no longer shows track names for audio CDs. You don't need a heavy suite like iTunes to see a track list and play a disc.
 
@@ -99,6 +110,7 @@ Made for people whose Winamp or Windows Media Player no longer shows track names
 - Reads the drive directly **without admin rights** (both the TOC / disc ID and raw audio)
 - Click a track to play it instantly (streamed straight from the drive), with seek, volume, equalizer, repeat and shuffle
 - Classic player-style UI with switchable skins (LAIN / AQUA)
+- Main, equalizer and playlist are **separate frameless windows**: drag them freely, they snap to each other, and positions are restored on next launch
 - **Manual editing** of titles and artists for discs MusicBrainz doesn't know. Edits are saved per disc and shown offline next time
 - **Export** to TXT / CSV / CUE / JSON. JSON can be imported back
 - A button that opens the MusicBrainz "attach disc ID" page, so unknown discs can be added to the shared database
@@ -110,7 +122,12 @@ Made for people whose Winamp or Windows Media Player no longer shows track names
 - Windows 10 / 11 (WebView2 is required; it ships with Windows 11)
 - An optical drive
 
-Linux support is planned. macOS is not supported for now.
+**Linux** (since v0.4.0)
+- Tested on Debian 12. `.deb`, `.rpm` and `.AppImage` packages are provided
+- To read the drive (`/dev/sr0` etc.) your user must be in the `cdrom` group:
+  run `sudo usermod -aG cdrom $USER`, then log out and in again
+
+macOS is not supported for now.
 
 ## Usage
 
@@ -124,11 +141,11 @@ If several releases match, choose one from the dropdown at the top.
 
 ## How it works
 
-1. Reads the table of contents with `IOCTL_CDROM_READ_TOC`
+1. Reads the table of contents with `IOCTL_CDROM_READ_TOC` (Windows) or `CDROMREADTOCENTRY` (Linux)
 2. Computes the MusicBrainz disc ID from the TOC and queries MusicBrainz; if that fails, falls back to a TOC search
-3. For playback, reads raw data with `IOCTL_CDROM_RAW_READ`, streams it in one-second chunks and plays it with Web Audio
+3. For playback, reads raw data with `IOCTL_CDROM_RAW_READ` (Linux: `CDROMREADAUDIO`), streams it in one-second chunks and plays it with Web Audio
 
-The drive is opened with ordinary read access, so no elevation is required.
+On Windows the drive is opened with ordinary read access, so no elevation is required.
 
 ## Build
 
@@ -142,19 +159,24 @@ cargo tauri build      # build an installer
 
 - `core/` – pure logic (TOC parsing, disc IDs, export formats). Test with `cargo test -p disctoc-core`
 - `core/src/cd_win.rs` – Windows drive access
+- `core/src/cd_linux.rs` – Linux drive access (`/dev/sr*` ioctls)
 - `src-tauri/` – the Tauri app
 - `ui/` – the UI (plain HTML / CSS / JS, skins in `skins/`)
 
 ## Status and limitations
 
-- Tested on a limited setup (one drive, a few discs). If a drive or disc doesn't work, please open an issue
+- Tested on a limited setup (Windows and Debian 12, one drive and a few discs each). If a drive or disc doesn't work, please open an issue
 - Playback may start a few seconds late while the drive spins up
 - Copy-protected discs (e.g. CCCD) may not be readable
-- Linux support and MP3 / OGG export are not implemented yet
+- The Linux build is untested on other distributions and on Wayland sessions
+- MP3 / OGG export is not implemented yet (WAV only)
 
 ## Install
 
-Download the Windows installer (`.msi` or `.exe`) from [Releases](../../releases).
+Download from [Releases](../../releases).
+
+- Windows: installer (`.msi` or `.exe`)
+- Linux: `.deb` (Debian / Ubuntu), `.rpm` (Fedora), or `.AppImage`
 
 ## License
 
