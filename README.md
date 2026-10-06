@@ -6,8 +6,7 @@
 
 Winamp や Windows Media Player で、CDを入れても曲名が出なくなった人向け。iTunes のような重いソフトを入れなくても、曲リストを見て再生できます。
 
-<!-- ここにスクリーンショット: docs/screenshot.png -->
-<!-- ![DISC.TOC](docs/screenshot.png) -->
+![DISC.TOC](docs/screenshot.png)
 
 ## 特徴
 
@@ -91,7 +90,7 @@ A lightweight desktop app for Windows that shows album, artist and track names w
 
 Made for people whose Winamp or Windows Media Player no longer shows track names for audio CDs. You don't need a heavy suite like iTunes to see a track list and play a disc.
 
-<!-- ![DISC.TOC](docs/screenshot.png) -->
+![DISC.TOC](docs/screenshot.png)
 
 ## Features
 
