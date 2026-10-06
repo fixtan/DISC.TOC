@@ -1,0 +1,38 @@
+name: release
+
+# タグ（例: v0.1.0）を push すると、Windows 用インストーラをビルドして
+# GitHub Releases に「下書き」で置く。内容を確認してから Publish する。
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install tauri-cli
+        run: cargo install tauri-cli --version "^2" --locked
+
+      - name: Test core
+        run: cargo test -p disctoc-core
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tauriScript: cargo tauri
+          tagName: ${{ github.ref_name }}
+          releaseName: 'DISC.TOC ${{ github.ref_name }}'
+          releaseBody: 'Windows インストーラ（.msi / .exe）。使い方は README を参照。'
+          releaseDraft: true
+          prerelease: false

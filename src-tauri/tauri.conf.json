@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "DISC.TOC",
+  "version": "0.1.0",
+  "identifier": "com.lainlab.disctoc",
+  "build": { "frontendDist": "../ui" },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [{ "title": "DISC.TOC", "width": 460, "height": 700, "minWidth": 440, "minHeight": 520 }],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' data:; media-src 'self' asset: http://asset.localhost; connect-src ipc: http://ipc.localhost",
+      "assetProtocol": { "enable": true, "scope": ["$TEMP/disctoc/**"] }
+    }
+  },
+  "bundle": { "active": true, "targets": "all", "icon": ["icons/icon.ico", "icons/icon.png"] }
+}

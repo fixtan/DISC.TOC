@@ -1,0 +1,121 @@
+/* ─── スキン変数（既定は LAIN＝暗い青）。他スキンは skins/*.css で #app[data-skin] の値を上書きする ─── */
+#app {
+  --dt-font: 'Courier New', 'Yu Gothic UI', 'Meiryo', monospace, sans-serif;
+  --dt-bg: #22262e;
+  --dt-border: #444;
+  --dt-border-light: #777;
+  --dt-shadow: 0 6px 18px rgba(0, 0, 0, 0.7);
+  --dt-radius: 0;
+  --dt-title-bg: linear-gradient(90deg, #0a192f, #1e3a8a);
+  --dt-title-fg: #8ed6ff;
+  --dt-display-bg: #000;
+  --dt-display-border: #114422;
+  --dt-time: #00ff66;
+  --dt-marquee: #00e1ff;
+  --dt-specs: #00aa66;
+  --dt-btn-bg: linear-gradient(180deg, #444, #111);
+  --dt-btn-border: #666;
+  --dt-btn-fg: #fff;
+  --dt-btn-radius: 0;
+  --dt-btn-active-bg: linear-gradient(180deg, #1e3a8a, #0a192f);
+  --dt-btn-active-fg: #8ed6ff;
+  --dt-btn-active-border: #8ed6ff;
+  --dt-accent: #00bfff;
+  --dt-panel-bg: #000;
+  --dt-panel-border: #333;
+  --dt-eq-line: #00e1ff;
+  --dt-pl-fg: #00ffcc;
+  --dt-sel-bg: #003366;
+  --dt-sel-fg: #fff;
+  --dt-muted: #666;
+  --dt-spec-low: #00ff66;
+  --dt-spec-mid: #e6ff00;
+  --dt-spec-high: #ff3030;
+  --dt-spec-peak: #cceeff;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #111; overflow: hidden; }
+[hidden] { display: none !important; }
+
+#app {
+  height: 100vh; display: flex; flex-direction: column; gap: 3px; padding: 3px;
+  background: #111; font-family: var(--dt-font); font-size: 12px; color: var(--dt-btn-fg);
+  user-select: none;
+}
+
+.dt-panel {
+  background: var(--dt-bg); border: 1px solid var(--dt-border);
+  border-top-color: var(--dt-border-light); border-left-color: var(--dt-border-light);
+  border-radius: var(--dt-radius); padding: 4px; box-shadow: var(--dt-shadow);
+}
+#dt-pl { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+.dt-title-bar {
+  background: var(--dt-title-bg); color: var(--dt-title-fg);
+  font-size: 10px; font-weight: bold; padding: 2px 4px; margin-bottom: 4px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.dt-close-btn { background: none; border: none; color: var(--dt-title-fg); cursor: pointer; font-size: 11px; padding: 0 2px; }
+
+/* ─── MAIN ─── */
+.dt-display {
+  background: var(--dt-display-bg); border: 1px solid var(--dt-display-border);
+  height: 46px; padding: 4px; display: flex; align-items: center; margin-bottom: 4px;
+}
+.dt-time-col { display: flex; flex-direction: column; }
+.dt-time { color: var(--dt-time); font-size: 18px; font-weight: bold; font-variant-numeric: tabular-nums; }
+.dt-spectrum { width: 76px; height: 14px; margin-top: 1px; }
+.dt-track-info { flex: 1; min-width: 0; margin-left: 10px; overflow: hidden; }
+.dt-marquee-wrap { overflow: hidden; white-space: nowrap; }
+.dt-marquee { display: inline-block; color: var(--dt-marquee); font-size: 12px; white-space: nowrap; }
+.dt-marquee.scroll { padding-left: 100%; animation: dt-marquee 12s linear infinite; }
+@keyframes dt-marquee { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+.dt-specs { color: var(--dt-specs); font-size: 9px; margin-top: 3px; }
+
+.dt-slider { width: 100%; height: 10px; accent-color: var(--dt-accent); cursor: pointer; margin: 0; }
+.dt-controls { display: flex; gap: 2px; margin-top: 5px; align-items: center; }
+.dt-controls .dt-vol { flex: none; width: 110px; margin-left: auto; }
+.dt-toggles { display: flex; gap: 2px; margin-top: 4px; }
+
+.dt-btn {
+  background: var(--dt-btn-bg); border: 1px solid var(--dt-btn-border); color: var(--dt-btn-fg);
+  border-radius: var(--dt-btn-radius); font: inherit; font-size: 11px; padding: 3px 9px; cursor: pointer; white-space: nowrap;
+}
+.dt-btn:hover { filter: brightness(1.15); }
+.dt-btn.active { background: var(--dt-btn-active-bg); color: var(--dt-btn-active-fg); border-color: var(--dt-btn-active-border); }
+.dt-btn:disabled { opacity: .5; cursor: default; }
+
+/* ─── EQ ─── */
+.dt-eq-canvas { background: var(--dt-panel-bg); width: 100%; height: 30px; border: 1px solid var(--dt-panel-border); margin-bottom: 4px; display: block; }
+.dt-eq-sliders { display: flex; justify-content: space-between; align-items: center; height: 54px; padding: 0 14px; }
+.dt-eq-slider { writing-mode: vertical-lr; direction: rtl; width: 14px; height: 46px; accent-color: var(--dt-accent); margin: 0; }
+.dt-eq-presets { display: flex; margin-top: 4px; }
+
+.dt-select {
+  background: var(--dt-panel-bg); color: var(--dt-pl-fg); border: 1px solid var(--dt-panel-border);
+  border-radius: var(--dt-btn-radius); font: inherit; font-size: 11px; padding: 2px 4px; min-width: 0;
+}
+.dt-eq-presets .dt-select { flex: 1; }
+
+/* ─── PLAYLIST ─── */
+.dt-toolbar { display: flex; gap: 3px; margin-bottom: 4px; align-items: center; flex-wrap: wrap; }
+.dt-toolbar .dt-drive { width: 64px; }
+.dt-toolbar .dt-cand { flex: 1; max-width: 260px; }
+.dt-sp { flex: 1; }
+.dt-meta { display: flex; gap: 4px; color: var(--dt-marquee); padding: 2px 2px 4px; min-height: 22px; align-items: center; }
+.dt-meta input { flex: 1; min-width: 0; }
+.dt-playlist-box {
+  flex: 1; min-height: 0; background: var(--dt-panel-bg); border: 1px solid var(--dt-panel-border);
+  color: var(--dt-pl-fg); font-size: 12px; overflow-y: auto; list-style: none; padding: 2px; margin: 0;
+}
+.dt-playlist-item { display: flex; gap: 8px; padding: 2px 4px; cursor: pointer; align-items: center; user-select: text; }
+.dt-playlist-item:hover { background: var(--dt-sel-bg); color: var(--dt-sel-fg); }
+.dt-playlist-item.active { background: var(--dt-sel-bg); color: var(--dt-sel-fg); }
+.dt-playlist-item .no { width: 24px; text-align: right; color: var(--dt-muted); flex: none; }
+.dt-playlist-item .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dt-playlist-item .d { color: var(--dt-muted); flex: none; font-variant-numeric: tabular-nums; }
+.dt-playlist-item input { width: 100%; font: inherit; background: var(--dt-panel-bg); color: var(--dt-pl-fg); border: 1px solid var(--dt-panel-border); padding: 1px 4px; }
+.dt-meta input { font: inherit; background: var(--dt-panel-bg); color: var(--dt-pl-fg); border: 1px solid var(--dt-panel-border); padding: 1px 4px; }
+.dt-status { color: #aa8; font-size: 11px; min-height: 16px; padding: 3px 2px 0; }
+#app[data-skin="aqua"] .dt-status { color: #7a6a20; }

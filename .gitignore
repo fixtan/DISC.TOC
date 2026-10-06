@@ -1,0 +1,8 @@
+target/
+src-tauri/gen/
+.history/
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+*.log
