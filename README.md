@@ -6,7 +6,7 @@
 
 Winamp や Windows Media Player で、CDを入れても曲名が出なくなった人向け。iTunes のような重いソフトを入れなくても、曲リストを見て再生できます。
 
-![DISC.TOC](docs/screenshot.png)
+![DISC.TOC](docs/screenshot.webp)
 
 ## 特徴
 
