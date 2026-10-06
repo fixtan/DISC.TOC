@@ -778,7 +778,7 @@ dependencies = [
 
 [[package]]
 name = "disctoc"
-version = "0.1.0"
+version = "0.3.0"
 dependencies = [
  "disctoc-core",
  "reqwest 0.12.28",
@@ -788,6 +788,7 @@ dependencies = [
  "tauri-build",
  "tauri-plugin-dialog",
  "tauri-plugin-opener",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]

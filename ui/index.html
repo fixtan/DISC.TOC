@@ -5,10 +5,15 @@
 <link rel="stylesheet" href="skins/aqua.css">
 </head><body>
 <div id="app">
-
   <!-- MAIN -->
   <section class="dt-panel" id="dt-main">
-    <div class="dt-title-bar"><span>DISC.TOC</span><button class="dt-close-btn" id="dt-skin" title="スキン">◐</button></div>
+    <div class="dt-title-bar" id="dt-drag"><span>DISC.TOC</span>
+      <span class="dt-tb-btns">
+        <button class="dt-close-btn" id="dt-skin" title="スキン">◐</button>
+        <button class="dt-close-btn" id="dt-min" title="最小化">–</button>
+        <button class="dt-close-btn" id="dt-quit" title="終了">✕</button>
+      </span>
+    </div>
     <div class="dt-display">
       <div class="dt-time-col">
         <div class="dt-time" id="dt-time">00:00</div>
@@ -29,49 +34,12 @@
       <input type="range" class="dt-slider dt-vol" id="dt-vol" min="0" max="1" step="0.05" value="1">
     </div>
     <div class="dt-toggles">
-      <button class="dt-btn" id="dt-eq-toggle">EQ</button>
+      <button class="dt-btn" id="dt-eq-toggle" title="イコライザーの窓を出す・しまう">EQ</button>
+      <button class="dt-btn" id="dt-pl-toggle" title="プレイリストの窓を出す・しまう">PL</button>
       <button class="dt-btn" id="dt-repeat">REP</button>
       <button class="dt-btn" id="dt-shuffle">SHUF</button>
     </div>
   </section>
-
-  <!-- EQUALIZER -->
-  <section class="dt-panel" id="dt-eq" hidden>
-    <div class="dt-title-bar"><span>EQUALIZER</span><button class="dt-close-btn" id="dt-eq-close">✕</button></div>
-    <canvas class="dt-eq-canvas" id="dt-eq-canvas" width="420" height="30"></canvas>
-    <div class="dt-eq-sliders" id="dt-eq-sliders"></div>
-    <div class="dt-eq-presets"><select id="dt-eq-preset" class="dt-select"></select></div>
-  </section>
-
-  <!-- PLAYLIST -->
-  <section class="dt-panel" id="dt-pl">
-    <div class="dt-title-bar"><span>PLAYLIST</span><span id="dt-count"></span></div>
-    <div class="dt-toolbar">
-      <select id="dt-drive" class="dt-select dt-drive"></select>
-      <button class="dt-btn" id="dt-reload">読込</button>
-      <select id="dt-cand" class="dt-select dt-cand" hidden></select>
-    </div>
-    <div class="dt-toolbar">
-      <button class="dt-btn" id="dt-edit">編集</button>
-      <button class="dt-btn" id="dt-save" hidden>保存</button>
-      <span class="dt-sp"></span>
-      <select id="dt-fmt" class="dt-select"><option value="txt">TXT</option><option value="csv">CSV</option><option value="cue">CUE</option><option value="json">JSON</option></select>
-      <button class="dt-btn" id="dt-export">書き出し</button>
-      <button class="dt-btn" id="dt-import">JSON読込</button>
-      <button class="dt-btn" id="dt-mbreg" title="MusicBrainzにこのCDを登録するページを開く">MB登録</button>
-      <input type="file" id="dt-file" accept=".json,application/json" hidden>
-    </div>
-    <div class="dt-toolbar">
-      <span class="dt-lbl">WAV</span>
-      <button class="dt-btn" id="dt-rip-one" title="選択中の曲をWAVで保存">選択曲</button>
-      <button class="dt-btn" id="dt-rip-all" title="全曲をフォルダにWAVで保存">全曲</button>
-      <button class="dt-btn" id="dt-rip-stop" hidden>中止</button>
-    </div>
-    <div class="dt-meta" id="dt-meta"></div>
-    <ul class="dt-playlist-box" id="dt-list"></ul>
-    <div class="dt-status" id="dt-status"></div>
-  </section>
-
 </div>
 <script type="module" src="app.js"></script>
 </body></html>

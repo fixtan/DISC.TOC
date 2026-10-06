@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><title>DISC.TOC - PLAYLIST</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="skins/aqua.css">
+</head><body>
+<div id="app">
+  <section class="dt-panel" id="dt-pl">
+    <div class="dt-title-bar" id="dt-drag"><span>PLAYLIST</span><span class="dt-tb-btns"><span id="dt-count"></span><button class="dt-close-btn" id="dt-close" title="しまう">✕</button></span></div>
+    <div class="dt-toolbar">
+      <select id="dt-drive" class="dt-select dt-drive"></select>
+      <button class="dt-btn" id="dt-reload">読込</button>
+      <select id="dt-cand" class="dt-select dt-cand" hidden></select>
+    </div>
+    <div class="dt-toolbar">
+      <button class="dt-btn" id="dt-edit">編集</button>
+      <button class="dt-btn" id="dt-save" hidden>保存</button>
+      <span class="dt-sp"></span>
+      <select id="dt-fmt" class="dt-select"><option value="txt">TXT</option><option value="csv">CSV</option><option value="cue">CUE</option><option value="json">JSON</option></select>
+      <button class="dt-btn" id="dt-export">書き出し</button>
+      <button class="dt-btn" id="dt-import">JSON読込</button>
+      <button class="dt-btn" id="dt-mbreg" title="MusicBrainzにこのCDを登録するページを開く">MB登録</button>
+      <input type="file" id="dt-file" accept=".json,application/json" hidden>
+    </div>
+    <div class="dt-toolbar">
+      <span class="dt-lbl">WAV</span>
+      <button class="dt-btn" id="dt-rip-one" title="選択中の曲をWAVで保存">選択曲</button>
+      <button class="dt-btn" id="dt-rip-all" title="全曲をフォルダにWAVで保存">全曲</button>
+      <button class="dt-btn" id="dt-rip-stop" hidden>中止</button>
+    </div>
+    <div class="dt-meta" id="dt-meta"></div>
+    <ul class="dt-playlist-box" id="dt-list"></ul>
+    <div class="dt-status" id="dt-status"></div>
+    <div class="dt-grip" id="dt-grip" title="大きさを変える"></div>
+  </section>
+</div>
+<script type="module" src="playlist.js"></script>
+</body></html>

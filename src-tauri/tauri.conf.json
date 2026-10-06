@@ -1,16 +1,71 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "DISC.TOC",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "identifier": "com.lainlab.disctoc",
-  "build": { "frontendDist": "../ui" },
+  "build": {
+    "frontendDist": "../ui"
+  },
   "app": {
     "withGlobalTauri": true,
-    "windows": [{ "title": "DISC.TOC", "width": 460, "height": 700, "minWidth": 440, "minHeight": 520 }],
+    "windows": [
+      {
+        "label": "main",
+        "url": "index.html",
+        "title": "DISC.TOC",
+        "width": 460,
+        "height": 160,
+        "resizable": false,
+        "decorations": false,
+        "maximizable": false,
+        "visible": false,
+        "shadow": true
+      },
+      {
+        "label": "eq",
+        "url": "eq.html",
+        "title": "DISC.TOC - EQ",
+        "width": 460,
+        "height": 152,
+        "resizable": false,
+        "skipTaskbar": true,
+        "decorations": false,
+        "maximizable": false,
+        "visible": false,
+        "shadow": true
+      },
+      {
+        "label": "playlist",
+        "url": "playlist.html",
+        "title": "DISC.TOC - PLAYLIST",
+        "width": 460,
+        "height": 380,
+        "minWidth": 440,
+        "minHeight": 240,
+        "resizable": true,
+        "skipTaskbar": true,
+        "decorations": false,
+        "maximizable": false,
+        "visible": false,
+        "shadow": true
+      }
+    ],
     "security": {
       "csp": "default-src 'self'; img-src 'self' data:; media-src 'self' asset: http://asset.localhost; connect-src ipc: http://ipc.localhost",
-      "assetProtocol": { "enable": true, "scope": ["$TEMP/disctoc/**"] }
+      "assetProtocol": {
+        "enable": true,
+        "scope": [
+          "$TEMP/disctoc/**"
+        ]
+      }
     }
   },
-  "bundle": { "active": true, "targets": "all", "icon": ["icons/icon.ico", "icons/icon.png"] }
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/icon.ico",
+      "icons/icon.png"
+    ]
+  }
 }

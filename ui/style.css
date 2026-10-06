@@ -39,7 +39,7 @@ html, body { margin: 0; height: 100%; background: #111; overflow: hidden; }
 [hidden] { display: none !important; }
 
 #app {
-  height: 100vh; display: flex; flex-direction: column; gap: 3px; padding: 3px;
+  height: 100vh; display: flex; flex-direction: column; gap: 0; padding: 1px;
   background: #111; font-family: var(--dt-font); font-size: 12px; color: var(--dt-btn-fg);
   user-select: none;
 }
@@ -49,13 +49,19 @@ html, body { margin: 0; height: 100%; background: #111; overflow: hidden; }
   border-top-color: var(--dt-border-light); border-left-color: var(--dt-border-light);
   border-radius: var(--dt-radius); padding: 4px; box-shadow: var(--dt-shadow);
 }
-#dt-pl { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+#app > .dt-panel { flex: 1; min-height: 0; }
+#dt-pl { display: flex; flex-direction: column; position: relative; }
+#dt-main, #dt-eq { overflow: hidden; }
 
 .dt-title-bar {
   background: var(--dt-title-bg); color: var(--dt-title-fg);
   font-size: 10px; font-weight: bold; padding: 2px 4px; margin-bottom: 4px;
   display: flex; justify-content: space-between; align-items: center;
 }
+.dt-title-bar { cursor: default; }
+.dt-tb-btns { display: flex; gap: 6px; align-items: center; }
+.dt-grip { position: absolute; right: 1px; bottom: 1px; width: 14px; height: 14px; cursor: nwse-resize; opacity: .55;
+  background: linear-gradient(135deg, transparent 50%, var(--dt-muted) 50%, var(--dt-muted) 58%, transparent 58%, transparent 70%, var(--dt-muted) 70%, var(--dt-muted) 78%, transparent 78%); }
 .dt-close-btn { background: none; border: none; color: var(--dt-title-fg); cursor: pointer; font-size: 11px; padding: 0 2px; }
 
 /* ─── MAIN ─── */
@@ -106,6 +112,7 @@ html, body { margin: 0; height: 100%; background: #111; overflow: hidden; }
 .dt-lbl { font-size: 10px; opacity: .7; margin: 0 2px; }
 .dt-meta { display: flex; gap: 4px; color: var(--dt-marquee); padding: 2px 2px 4px; min-height: 22px; align-items: center; }
 .dt-meta input { flex: 1; min-width: 0; }
+.dt-meta input.dt-year { flex: 0 0 70px; }
 .dt-playlist-box {
   flex: 1; min-height: 0; background: var(--dt-panel-bg); border: 1px solid var(--dt-panel-border);
   color: var(--dt-pl-fg); font-size: 12px; overflow-y: auto; list-style: none; padding: 2px; margin: 0;
