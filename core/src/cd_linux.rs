@@ -21,13 +21,14 @@ struct TocHdr {
     last: u8,
 }
 
+/// Mirrors the kernel's `struct cdrom_tocentry` (12 bytes: the address union is 4-byte aligned).
 #[repr(C)]
 #[derive(Default)]
 struct TocEntry {
     track: u8,
     adr_ctrl: u8,
     format: u8,
-    addr: [u8; 4], // msf: minute, second, frame, 0   /  lba: i32
+    addr: u32, // msf: bytes minute, second, frame, 0 (native endian)  /  lba: i32
     datamode: u8,
 }
 
@@ -85,7 +86,8 @@ impl Drive {
             if unsafe { libc::ioctl(fd, CDROMREADTOCENTRY, &mut e as *mut TocEntry) } != 0 {
                 return Err(format!("READ_TOC_ENTRY {track} failed ({})", std::io::Error::last_os_error()));
             }
-            let (m, s, f) = (e.addr[0] as i64, e.addr[1] as i64, e.addr[2] as i64);
+            let a = e.addr.to_ne_bytes();
+            let (m, s, f) = (a[0] as i64, a[1] as i64, a[2] as i64);
             Ok(((m * 60 + s) * 75 + f - LEADIN as i64).max(0))
         };
         let mut starts = Vec::new();
@@ -147,5 +149,19 @@ impl Drive {
             done += n;
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn struct_layouts_match_kernel() {
+        assert_eq!(std::mem::size_of::<TocEntry>(), 12);
+        assert_eq!(std::mem::offset_of!(TocEntry, addr), 4);
+        assert_eq!(std::mem::size_of::<TocHdr>(), 2);
+        assert_eq!(std::mem::size_of::<ReadAudio>(), 24);
+        assert_eq!(std::mem::offset_of!(ReadAudio, nframes), 8);
+        assert_eq!(std::mem::offset_of!(ReadAudio, buf), 16);
     }
 }
