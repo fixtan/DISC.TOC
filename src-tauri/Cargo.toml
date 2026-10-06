@@ -20,3 +20,6 @@ reqwest = { version = "0.12", default-features = false, features = ["json", "rus
 disctoc-core = { path = "../core" }
 [target.'cfg(windows)'.dependencies]
 windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_Graphics_Dwm"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+libc = "0.2"

@@ -4,6 +4,13 @@ pub mod export;
 pub mod mb;
 #[cfg(windows)]
 pub mod cd_win;
+#[cfg(target_os = "linux")]
+pub mod cd_linux;
+
+#[cfg(windows)]
+pub use cd_win as cd;
+#[cfg(target_os = "linux")]
+pub use cd_linux as cd;
 
 use sha1::{Digest, Sha1};
 
