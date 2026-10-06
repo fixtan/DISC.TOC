@@ -14,9 +14,9 @@ struct TrackOut { no: u32, start: u32, sectors: u32, secs: u32 }
 #[derive(Serialize)]
 struct TocOut { tracks: Vec<TrackOut>, mb_id: String, cddb_id: String, mb_toc: String }
 
-#[cfg(windows)]
-fn open_toc(drive: &str) -> Result<(disctoc_core::cd_win::Drive, Toc), String> {
-    let d = disctoc_core::cd_win::Drive::open(drive)?;
+#[cfg(any(windows, target_os = "linux"))]
+fn open_toc(drive: &str) -> Result<(disctoc_core::cd::Drive, Toc), String> {
+    let d = disctoc_core::cd::Drive::open(drive)?;
     let t = d.read_toc()?;
     Ok((d, t))
 }
@@ -40,15 +40,15 @@ fn win_raise_all(app: tauri::AppHandle, label: String) {
 
 #[tauri::command]
 fn list_drives() -> Vec<String> {
-    #[cfg(windows)]
-    { disctoc_core::cd_win::list_drives() }
-    #[cfg(not(windows))]
+    #[cfg(any(windows, target_os = "linux"))]
+    { disctoc_core::cd::list_drives() }
+    #[cfg(not(any(windows, target_os = "linux")))]
     { Vec::new() } // TODO: Linux (/dev/sr*, CDROMREADTOCHDR/ENTRY, CDROMREADAUDIO)
 }
 
 #[tauri::command]
 fn read_toc(drive: String) -> Result<TocOut, String> {
-    #[cfg(windows)]
+    #[cfg(any(windows, target_os = "linux"))]
     {
         let (_d, t) = open_toc(&drive)?;
         let tracks = (0..t.track_count()).map(|i| {
@@ -57,7 +57,7 @@ fn read_toc(drive: String) -> Result<TocOut, String> {
         }).collect();
         Ok(TocOut { tracks, mb_id: t.musicbrainz_id(), cddb_id: t.cddb_id(), mb_toc: t.mb_toc_param() })
     }
-    #[cfg(not(windows))]
+    #[cfg(not(any(windows, target_os = "linux")))]
     { let _ = drive; Err("not supported on this OS yet".into()) }
 }
 
@@ -73,9 +73,9 @@ struct LookupOut { source: String, candidates: Vec<mb::Candidate> }
 
 #[tauri::command]
 async fn lookup(app: tauri::AppHandle, drive: String) -> Result<LookupOut, String> {
-    #[cfg(not(windows))]
+    #[cfg(not(any(windows, target_os = "linux")))]
     { let _ = (app, drive); return Err("not supported on this OS yet".into()); }
-    #[cfg(windows)]
+    #[cfg(any(windows, target_os = "linux"))]
     {
         let t = { let (_d, t) = open_toc(&drive)?; t };
         let id = t.musicbrainz_id();
@@ -109,13 +109,13 @@ fn meta_path(app: &tauri::AppHandle, id: &str) -> Result<std::path::PathBuf, Str
     Ok(dir.join(format!("{id}.json")))
 }
 
-#[cfg(windows)]
+#[cfg(any(windows, target_os = "linux"))]
 fn load_local(app: &tauri::AppHandle, id: &str) -> Option<DiscMeta> {
     let p = meta_path(app, id).ok()?;
     serde_json::from_str(&std::fs::read_to_string(p).ok()?).ok()
 }
 
-#[cfg(windows)]
+#[cfg(any(windows, target_os = "linux"))]
 fn to_candidate(m: &DiscMeta) -> mb::Candidate {
     mb::Candidate {
         release_id: "local".into(),
@@ -161,25 +161,25 @@ async fn export_file(app: tauri::AppHandle, meta: DiscMeta, fmt: String, name: S
     Ok(Some(path.to_string_lossy().into_owned()))
 }
 
-#[cfg(windows)]
+#[cfg(any(windows, target_os = "linux"))]
 async fn tokio_sleep() {
     // tauri re-exports its async runtime; spawn_blocking keeps this dependency-free
     let _ = tauri::async_runtime::spawn_blocking(|| std::thread::sleep(Duration::from_millis(1100))).await;
 }
 
-#[cfg(windows)]
-static DRIVE: std::sync::Mutex<Option<(String, disctoc_core::cd_win::Drive)>> = std::sync::Mutex::new(None);
+#[cfg(any(windows, target_os = "linux"))]
+static DRIVE: std::sync::Mutex<Option<(String, disctoc_core::cd::Drive)>> = std::sync::Mutex::new(None);
 
 /// Raw CDDA PCM (16bit LE stereo 44.1k) for `count` sectors from `lba`. The frontend streams a track by calling this ~1s at a time.
 #[tauri::command]
 async fn read_pcm(drive: String, lba: u32, count: u32) -> Result<tauri::ipc::Response, String> {
-    #[cfg(not(windows))]
+    #[cfg(not(any(windows, target_os = "linux")))]
     { let _ = (drive, lba, count); return Err("not supported on this OS yet".into()); }
-    #[cfg(windows)]
+    #[cfg(any(windows, target_os = "linux"))]
     tauri::async_runtime::spawn_blocking(move || {
         let mut g = DRIVE.lock().unwrap_or_else(|e| e.into_inner());
         if g.as_ref().map(|(d, _)| d != &drive).unwrap_or(true) {
-            *g = Some((drive.clone(), disctoc_core::cd_win::Drive::open(&drive)?));
+            *g = Some((drive.clone(), disctoc_core::cd::Drive::open(&drive)?));
         }
         match g.as_ref().unwrap().1.read_pcm(lba, count.min(150)) {
             Ok(v) => Ok(tauri::ipc::Response::new(v)),
@@ -211,9 +211,9 @@ fn safe_name(s: &str) -> String {
 /// Rip tracks to WAV files in a folder the user picks. Emits "rip-progress". Unreadable sectors become silence (counted in bad_sectors).
 #[tauri::command]
 async fn rip_wav(app: tauri::AppHandle, drive: String, tracks: Vec<RipTrack>) -> Result<RipResult, String> {
-    #[cfg(not(windows))]
+    #[cfg(not(any(windows, target_os = "linux")))]
     { let _ = (app, drive, tracks); return Err("not supported on this OS yet".into()); }
-    #[cfg(windows)]
+    #[cfg(any(windows, target_os = "linux"))]
     {
         let app2 = app.clone();
         let picked = tauri::async_runtime::spawn_blocking(move || app2.dialog().file().blocking_pick_folder())
@@ -226,7 +226,7 @@ async fn rip_wav(app: tauri::AppHandle, drive: String, tracks: Vec<RipTrack>) ->
             use std::io::Write;
             use std::sync::atomic::Ordering::Relaxed;
             const SB: usize = 2352;
-            let d = disctoc_core::cd_win::Drive::open(&drive)?; // own handle: independent of the playback handle
+            let d = disctoc_core::cd::Drive::open(&drive)?; // own handle: independent of the playback handle
             let total = tracks.len();
             let (mut written, mut bad) = (0usize, 0u32);
             for (i, t) in tracks.iter().enumerate() {
