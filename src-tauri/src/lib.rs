@@ -1,7 +1,7 @@
-use disctoc_core::{export::DiscMeta, mb, Toc};
-use tauri::Manager;
+use disctoc_core::{export::DiscMeta, mb, wav_header, Toc};
+use tauri::{Emitter, Manager};
 use tauri_plugin_dialog::DialogExt;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::time::Duration;
 
@@ -171,11 +171,83 @@ async fn read_pcm(drive: String, lba: u32, count: u32) -> Result<tauri::ipc::Res
     }).await.map_err(|e| e.to_string())?
 }
 
+#[derive(Deserialize)]
+struct RipTrack { start: u32, sectors: u32, name: String }
+
+#[derive(Serialize, Clone)]
+struct RipProgress { index: usize, total: usize, name: String, done: u32, sectors: u32 }
+
+#[derive(Serialize)]
+struct RipResult { dir: Option<String>, written: usize, bad_sectors: u32, cancelled: bool }
+
+static RIP_CANCEL: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+#[tauri::command]
+fn rip_cancel() { RIP_CANCEL.store(true, std::sync::atomic::Ordering::Relaxed); }
+
+fn safe_name(s: &str) -> String {
+    let t: String = s.chars().map(|c| if "\\/:*?\"<>|".contains(c) || c.is_control() { '_' } else { c }).collect();
+    let t = t.trim().trim_end_matches('.').trim().to_string();
+    if t.is_empty() { "track".into() } else { t.chars().take(120).collect() }
+}
+
+/// Rip tracks to WAV files in a folder the user picks. Emits "rip-progress". Unreadable sectors become silence (counted in bad_sectors).
+#[tauri::command]
+async fn rip_wav(app: tauri::AppHandle, drive: String, tracks: Vec<RipTrack>) -> Result<RipResult, String> {
+    #[cfg(not(windows))]
+    { let _ = (app, drive, tracks); return Err("not supported on this OS yet".into()); }
+    #[cfg(windows)]
+    {
+        let app2 = app.clone();
+        let picked = tauri::async_runtime::spawn_blocking(move || app2.dialog().file().blocking_pick_folder())
+            .await.map_err(|e| e.to_string())?;
+        let Some(fp) = picked else { return Ok(RipResult { dir: None, written: 0, bad_sectors: 0, cancelled: true }) };
+        let dir = fp.into_path().map_err(|e| e.to_string())?;
+        RIP_CANCEL.store(false, std::sync::atomic::Ordering::Relaxed);
+        let dir2 = dir.clone();
+        tauri::async_runtime::spawn_blocking(move || -> Result<RipResult, String> {
+            use std::io::Write;
+            use std::sync::atomic::Ordering::Relaxed;
+            const SB: usize = 2352;
+            let d = disctoc_core::cd_win::Drive::open(&drive)?; // own handle: independent of the playback handle
+            let total = tracks.len();
+            let (mut written, mut bad) = (0usize, 0u32);
+            for (i, t) in tracks.iter().enumerate() {
+                let fin = dir2.join(format!("{}.wav", safe_name(&t.name)));
+                let part = dir2.join(format!("{}.wav.part", safe_name(&t.name)));
+                let mut f = std::io::BufWriter::new(std::fs::File::create(&part).map_err(|e| format!("{}: {e}", part.display()))?);
+                f.write_all(&wav_header(t.sectors * SB as u32)).map_err(|e| e.to_string())?;
+                let mut lba = t.start; let end = t.start + t.sectors;
+                while lba < end {
+                    if RIP_CANCEL.load(Relaxed) { drop(f); let _ = std::fs::remove_file(&part); return Ok(RipResult { dir: Some(dir2.to_string_lossy().into_owned()), written, bad_sectors: bad, cancelled: true }); }
+                    let n = 75u32.min(end - lba);
+                    match d.read_pcm(lba, n) {
+                        Ok(v) => f.write_all(&v).map_err(|e| e.to_string())?,
+                        Err(_) => for k in 0..n { // retry one sector at a time; silence for the unreadable ones
+                            match d.read_pcm(lba + k, 1) {
+                                Ok(v) => f.write_all(&v).map_err(|e| e.to_string())?,
+                                Err(_) => { bad += 1; f.write_all(&[0u8; SB]).map_err(|e| e.to_string())?; }
+                            }
+                        },
+                    }
+                    lba += n;
+                    let _ = app.emit("rip-progress", RipProgress { index: i, total, name: t.name.clone(), done: lba - t.start, sectors: t.sectors });
+                }
+                f.flush().map_err(|e| e.to_string())?; drop(f);
+                let _ = std::fs::remove_file(&fin);
+                std::fs::rename(&part, &fin).map_err(|e| e.to_string())?;
+                written += 1;
+            }
+            Ok(RipResult { dir: Some(dir2.to_string_lossy().into_owned()), written, bad_sectors: bad, cancelled: false })
+        }).await.map_err(|e| e.to_string())?
+    }
+}
+
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![list_drives, read_toc, lookup, read_pcm, save_meta, export_text, export_file])
+        .invoke_handler(tauri::generate_handler![list_drives, read_toc, lookup, read_pcm, save_meta, export_text, export_file, rip_wav, rip_cancel])
         .run(tauri::generate_context!())
         .expect("error while running DISC.TOC");
 }

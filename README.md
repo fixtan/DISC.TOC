@@ -18,6 +18,7 @@ Winamp や Windows Media Player で、CDを入れても曲名が出なくなっ�
 - **書き出し**: TXT / CSV / CUE / JSON。JSON は読み込んで復元できる
 - MusicBrainz への登録ページを開くボタン（情報が無いCDを、みんなで育てるDBに登録できる）
 - コンピレーション盤（トラックごとにアーティストが違うCD）にも対応
+- **WAV書き出し**: 選択曲または全曲をWAVで保存（読めないセクタは無音で埋めて報告）
 
 ## 動作環境
 
@@ -102,6 +103,7 @@ Made for people whose Winamp or Windows Media Player no longer shows track names
 - **Export** to TXT / CSV / CUE / JSON. JSON can be imported back
 - A button that opens the MusicBrainz "attach disc ID" page, so unknown discs can be added to the shared database
 - Handles compilation discs with a different artist per track
+- **WAV export**: save the selected track or the whole disc as WAV (unreadable sectors are filled with silence and reported)
 
 ## Requirements
 

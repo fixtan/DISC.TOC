@@ -103,6 +103,7 @@ html, body { margin: 0; height: 100%; background: #111; overflow: hidden; }
 .dt-toolbar .dt-drive { width: 64px; }
 .dt-toolbar .dt-cand { flex: 1; max-width: 260px; }
 .dt-sp { flex: 1; }
+.dt-lbl { font-size: 10px; opacity: .7; margin: 0 2px; }
 .dt-meta { display: flex; gap: 4px; color: var(--dt-marquee); padding: 2px 2px 4px; min-height: 22px; align-items: center; }
 .dt-meta input { flex: 1; min-width: 0; }
 .dt-playlist-box {

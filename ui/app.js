@@ -285,6 +285,39 @@ $('dt-file').onchange = async () => {
 };
 $('dt-mbreg').onclick = () => { if (toc) window.__TAURI__.opener.openUrl('https://musicbrainz.org/cdtoc/attach?toc=' + toc.mb_toc); };
 
+// ───────── WAV書き出し（CDリッピング） ─────────
+let ripping = false;
+const pad2 = (n) => String(n).padStart(2, '0');
+function ripName(i) {
+  const t = meta.tracks[i], no = pad2(toc.tracks[i].no), title = t.title || `Track ${no}`;
+  return `${no} - ${t.artist && t.artist !== meta.artist ? t.artist + ' - ' : ''}${title}`;
+}
+async function rip(idxs) {
+  if (!toc || ripping) return;
+  stopPlayback(true); ripping = true;
+  for (const id of ['dt-rip-one', 'dt-rip-all']) $(id).disabled = true;
+  $('dt-rip-stop').hidden = false;
+  const unlisten = await window.__TAURI__.event.listen('rip-progress', (e) => {
+    const p = e.payload, pct = Math.floor((p.done / p.sectors) * 100);
+    status(`書き出し中 ${p.index + 1}/${p.total}  ${pct}%  ${p.name}`);
+  });
+  try {
+    const tracks = idxs.map((i) => ({ start: toc.tracks[i].start, sectors: toc.tracks[i].sectors, name: ripName(i) }));
+    const r = await invoke('rip_wav', { drive: $('dt-drive').value, tracks });
+    if (!r.dir) status('');
+    else if (r.cancelled) status(`中止しました（${r.written}曲 保存済み）`);
+    else status(`${r.written}曲を書き出しました: ${r.dir}` + (r.bad_sectors ? `（読めなかったセクタ ${r.bad_sectors} 個は無音）` : ''));
+  } catch (e) { status('書き出しエラー: ' + e); }
+  finally {
+    unlisten(); ripping = false;
+    for (const id of ['dt-rip-one', 'dt-rip-all']) $(id).disabled = false;
+    $('dt-rip-stop').hidden = true;
+  }
+}
+$('dt-rip-one').onclick = () => { if (!toc) return; if (P.idx === null) return status('曲を選んでから押してください'); rip([P.idx]); };
+$('dt-rip-all').onclick = () => { if (toc) rip(toc.tracks.map((_, i) => i)); };
+$('dt-rip-stop').onclick = () => invoke('rip_cancel');
+
 (async () => {
   const ds = await invoke('list_drives');
   $('dt-drive').innerHTML = ds.map((d) => `<option>${d}</option>`).join('');
